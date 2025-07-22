@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Preventive Maintenance Report</title>
+  <style>
+    :root {
+      --maroon: #800000;
+      --light-gray: #f8f9fa;
+      --dark-text: #333;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: white;
+      color: var(--dark-text);
+    }
+    .company-header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 2px solid var(--maroon);
+    }
+    .company-logo {
+      width: 250px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    .report-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .section {
+      margin-bottom: 30px;
+      page-break-inside: avoid;
+    }
+    .section-title {
+      color: var(--maroon);
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+      margin-bottom: 15px;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .info-item {
+      margin-bottom: 8px;
+    }
+    .info-label {
+      font-weight: bold;
+      color: var(--maroon);
+    }
+    #signature-image {
+      max-width: 300px;
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+    #uploaded-images img {
+      max-width: 200px;
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+    #uploaded-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 12px;
+      color: #777;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        zoom: 1;
+      }
+      .company-logo {
+        width: 250px !important;
+        height: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="report-container" id="report-content">
+  <div class="company-header">
+    <img src="rfm-logo-new.svg" alt="Reliance Facilities Management" class="company-logo" id="company-logo" />
+    <h2>RELIANCE FACILITIES MANAGEMENT LLC</h2>
+    <p>603 Opal Tower, Business Bay, Dubai</p>
+  </div>
+
+  <div class="report-container" id="report-content">
+    <h1 class="section-title">Preventive Maintenance Report</h1>
+
+    <div class="section">
+      <h2 class="section-title">Job Details</h2>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">Ticket No:</span> <span id="ticket-number"></span></div>
+        <div class="info-item"><span class="info-label">Client Email:</span> <span id="client-email"></span></div>
+        <div class="info-item"><span class="info-label">Client Name:</span> <span id="client-name"></span></div>
+        <div class="info-item"><span class="info-label">Date:</span> <span id="report-date"></span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Work Description</h2>
+      <p id="workdesc">Loading...</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Technician Remarks</h2>
+      <p id="tech-remarks">Loading...</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Customer Feedback</h2>
+      <p id="customer-feedback">Loading...</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Customer Comments</h2>
+      <p id="customer-comments">Loading...</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Time Spent</h2>
+      <p id="time-spent">Loading...</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Customer Signature</h2>
+      <canvas id="signature-canvas" style="border: 1px solid #ccc; padding: 5px;"></canvas>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Uploaded Images</h2>
+      <div id="uploaded-images"></div>
+    </div>
+
+    <div class="footer">
+      <p>This report was generated automatically by RFM Work Order System</p>
+    </div>
+  </div>
+
+  <div class="no-print" style="text-align:center; margin: 20px;">
+    <button onclick="window.print()" style="padding: 10px 20px; background: var(--maroon); color: white; border: none; border-radius: 4px;">Print Report</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("izcTDhhNGe6VtR2VO");
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+
+      const ticket = params.get("ticket_number") || "N/A";
+      const email = params.get("client_email") || "Not Provided";
+      const name = params.get("client_name") || "Client";
+      const workdesc = decodeURIComponent(params.get("workdesc") || "Preventive Maintenance");
+      const remarks = decodeURIComponent(params.get("technician_remarks") || "N/A");
+      const feedback = decodeURIComponent(params.get("customer_feedback") || "N/A");
+      const comments = decodeURIComponent(params.get("customer_comments") || "N/A");
+      const timeSpent = decodeURIComponent(params.get("time_spent") || "N/A");
+
+      const signatureURL = params.get("signature") || "";
+      const imageURLs = params.getAll("images[]");
+
+      document.getElementById("ticket-number").textContent = ticket;
+      document.getElementById("client-email").textContent = email;
+      document.getElementById("client-name").textContent = name;
+      document.getElementById("report-date").textContent = new Date().toLocaleDateString();
+      document.getElementById("workdesc").textContent = workdesc;
+      document.getElementById("tech-remarks").textContent = remarks;
+      document.getElementById("customer-feedback").textContent = feedback;
+      document.getElementById("customer-comments").textContent = comments;
+      document.getElementById("time-spent").textContent = timeSpent;
+
+      await loadLogo();
+      await loadSignature(signatureURL);
+
+      const imagesContainer = document.getElementById("uploaded-images");
+      imageURLs.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        imagesContainer.appendChild(img);
+      });
+
+      setTimeout(() => generateAndSendPDF(email, name, ticket), 1000);
+    });
+
+    async function loadLogo() {
+      try {
+        const logo = document.getElementById("company-logo");
+        const logoURL = logo.src;
+        if (logoURL) {
+          const dataURL = await urlToDataURL(logoURL);
+          logo.src = dataURL;
+          
+          // Ensure logo is fully loaded before printing
+          await new Promise((resolve) => {
+            logo.onload = resolve;
+            if (logo.complete) resolve();
+          });
+        }
+      } catch (error) {
+        console.error("Error loading logo:", error);
+      }
+    }
+
+    async function loadSignature(signatureURL) {
+      if (!signatureURL) return;
+      
+      try {
+        const canvas = document.getElementById("signature-canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+        
+        img.onload = function() {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+        };
+        
+        img.src = await urlToDataURL(signatureURL);
+      } catch (error) {
+        console.error("Error loading signature:", error);
+      }
+    }
+
+    async function urlToDataURL(url) {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function generateAndSendPDF(toEmail, clientName, ticketNumber) {
+      const element = document.getElementById("report-content");
+      const opt = {
+        margin: 0.5,
+        filename: `RFM_Report_${ticketNumber}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: true
+        },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save();
+
+      const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+      const base64 = await blobToBase64(pdfBlob);
+
+      emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+        to_email: toEmail,
+        client_name: clientName,
+        message: `Dear ${clientName}, please find attached your maintenance report for ticket #${ticketNumber}.`,
+        attachment: `data:application/pdf;base64,${base64}`
+      }).then(() => {
+        console.log("✅ Email sent to client");
+      }).catch((err) => {
+        console.error("❌ Email sending failed", err);
+      });
+    }
+
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+  </script>
+</body>
+</html>
