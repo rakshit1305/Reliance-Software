@@ -374,7 +374,7 @@
       const form = this;
       const serviceInput = document.getElementById('selectedServiceDisplay');
       const ticketNumber = Math.floor(1000 + Math.random() * 9000).toString();
-      const adminURL = `http://localhost:5502/manager.html?name=${encodeURIComponent(form.name.value.trim())}&phone=${encodeURIComponent(iti.getNumber())}&building=${encodeURIComponent(form.building.value.trim())}&service=${encodeURIComponent(serviceInput.value.trim())}&ticket=${ticketNumber}&client_email=${encodeURIComponent(form.email.value.trim())}&workdesc=${encodeURIComponent(form.description.value.trim())}`;
+      const adminURL = `https://relaince-software.vercel.app/manager.html?name=${encodeURIComponent(form.name.value.trim())}&phone=${encodeURIComponent(iti.getNumber())}&building=${encodeURIComponent(form.building.value.trim())}&service=${encodeURIComponent(serviceInput.value.trim())}&ticket=${ticketNumber}&client_email=${encodeURIComponent(form.email.value.trim())}&workdesc=${encodeURIComponent(form.description.value.trim())}`;
 
 ;
 
