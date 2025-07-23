@@ -579,7 +579,7 @@
 
     // Generate the technician portal URL with client info as query parameters
     function generateTechnicianPortalLink(ticket, clientName, phone, building, service, workdesc,clientEmail) {
-      const baseUrl = "http://reliance-software.vercel.app/technician.html"; // TODO: Replace with your actual technician portal URL
+      const baseUrl = "https://reliance-software.vercel.app/technician.html"; // TODO: Replace with your actual technician portal URL
       const finalUrl = `${baseUrl}?ticket_number=123&name=Rakshit&phone=0501234567&building=UIC&workdesc=Fix%20Leak&service=Plumbing&client_email=client@example.com`;
 
       const params = new URLSearchParams({
