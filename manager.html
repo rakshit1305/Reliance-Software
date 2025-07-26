@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manager Portal - Assign Technician</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #F5F5DC;
+      color: #5D4037;
+    }
+    .header {
+      background-color: #800000;
+      padding: 20px;
+      text-align: center;
+      color: white;
+      border-bottom: 5px solid #6D4C41;
+    }
+    .logo {
+      max-width: 300px;
+      margin-bottom: 10px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(93, 64, 55, 0.1);
+      border: 1px solid #D2B48C;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #800000;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background-color: #FFF8E1;
+      border-radius: 5px;
+      border: 1px solid #D2B48C;
+    }
+    .ticket-details, .technicians-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    .detail-item {
+      margin-bottom: 10px;
+    }
+    .detail-label {
+      font-weight: 600;
+      color: #6D4C41;
+    }
+    .detail-value {
+      font-size: 16px;
+      padding: 8px 0;
+      border-bottom: 1px solid #D2B48C;
+    }
+    .technician-card {
+      background-color: white;
+      border: 1px solid #D2B48C;
+      border-radius: 5px;
+      padding: 15px;
+      cursor: pointer;
+      position: relative;
+    }
+    .technician-card:hover {
+      border-color: #800000;
+      box-shadow: 0 0 8px rgba(128, 0, 0, 0.2);
+    }
+    .technician-card.selected {
+      background-color: #F5E9E9;
+      border-color: #800000;
+    }
+    .assigned-info {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #E8F5E9;
+      border-radius: 5px;
+      display: none;
+      border: 1px solid #A5D6A7;
+    }
+    .button-group {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button {
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .button-confirm {
+      background-color: #6D4C41;
+    }
+    .button-send {
+      background-color: #800000;
+    }
+    .button-manage {
+      background-color: #5D4037;
+    }
+    .button-edit {
+      background-color: #1565C0;
+      padding: 5px 8px;
+      font-size: 12px;
+    }
+    .button-delete {
+      background-color: #C62828;
+      padding: 5px 8px;
+      font-size: 12px;
+    }
+    .status-message {
+      padding: 15px;
+      margin-top: 20px;
+      display: none;
+      border-radius: 5px;
+    }
+    .success {
+      background-color: #E8F5E9;
+      color: #2E7D32;
+      border: 1px solid #A5D6A7;
+    }
+    .error {
+      background-color: #FFEBEE;
+      color: #C62828;
+      border: 1px solid #EF9A9A;
+    }
+    .datetime-inputs {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .datetime-inputs input {
+      padding: 8px;
+      border: 1px solid #D2B48C;
+      border-radius: 4px;
+    }
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #FFF8E1;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #D2B48C;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 600px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #D2B48C;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .close {
+      color: #5D4037;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #6D4C41;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #D2B48C;
+      border-radius: 4px;
+    }
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .tech-actions {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      display: flex;
+      gap: 5px;
+    }
+    .unavailable {
+      color: #C62828;
+      font-size: 13px;
+    }
+    /* Checkbox styles */
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .checkbox-container label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .checkbox-custom {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border: 1px solid #D2B48C;
+      border-radius: 4px;
+      margin-right: 10px;
+      position: relative;
+    }
+    .checkbox-custom:after {
+      content: "";
+      position: absolute;
+      display: none;
+      left: 7px;
+      top: 3px;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    input[type="checkbox"] {
+      display: none;
+    }
+    input[type="checkbox"]:checked + .checkbox-custom {
+      background-color: #5D4037;
+      border-color: #5D4037;
+    }
+    input[type="checkbox"]:checked + .checkbox-custom:after {
+      display: block;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    (function () {
+      emailjs.init("izcTDhhNGe6VtR2VO"); // Your EmailJS public key
+    })();
+  </script>
+</head>
+<body>
+  <div class="header">
+    <img src="rfmlogo.png" alt="RFM Logo" class="logo" />
+    <h2><h2></h2>Work Order Assignment System</h2>
+  </div>
+
+  <div class="container">
+    <h1>Manager Portal - Assign Technician</h1>
+
+    <div class="section">
+      <h2 class="section-title">Service Ticket Details</h2>
+      <div class="ticket-details">
+        <div class="detail-item">
+          <div class="detail-label">Ticket Number</div>
+          <div class="detail-value" id="ticketNumber"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Building Name</div>
+          <div class="detail-value" id="buildingName"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Unit Number</div>
+          <div class="detail-value" id="unit"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Client Name</div>
+          <div class="detail-value" id="clientName"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Client Contact No.</div>
+          <div class="detail-value" id="clientContact"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Client Email</div>
+          <div class="detail-value" id="clientEmail"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Service Type</div>
+          <div class="detail-value" id="serviceType"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Work Description</div>
+          <div class="detail-value" id="workDescription"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 class="section-title">Available Technicians</h2>
+        <button id="manageTechnicians" class="button-manage">Manage Technicians</button>
+      </div>
+      <div class="technicians-list" id="techniciansList"></div>
+
+      <div class="assigned-info" id="assignedInfo">
+        <h3>Assigned Technician</h3>
+        <p><strong>Name:</strong> <span id="assignedTechName"></span></p>
+        <p><strong>Service:</strong> <span id="assignedTechService"></span></p>
+        <p><strong>Email:</strong> <span id="assignedTechEmail"></span></p>
+        <p><strong>Contact:</strong> <span id="assignedTechContact"></span></p>
+
+        <div class="datetime-inputs">
+          <div>
+            <label for="arrivalDate">Scheduled Date:</label>
+            <input type="date" id="arrivalDate" required />
+          </div>
+          <div>
+            <label for="arrivalTime">Scheduled Time:</label>
+            <input type="time" id="arrivalTime" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button id="confirmWorkOrder" class="button-confirm" disabled>Confirm Work Order</button>
+        <button id="sendWorkOrder" class="button-send" disabled>Send Work Order</button>
+      </div>
+    </div>
+
+    <div class="status-message" id="statusMessage"></div>
+  </div>
+
+  <!-- Technician Management Modal -->
+  <div id="techModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Technician</h2>
+        <span class="close">&times;</span>
+      </div>
+      <form id="techForm">
+        <input type="hidden" id="techId">
+        <div class="form-group">
+          <label for="techName">Name:</label>
+          <input type="text" id="techName" required>
+        </div>
+        <div class="form-group">
+          <label for="techService">Service:</label>
+          <select id="techService" required>
+            <option value="HVAC/Mechanical">HVAC/Mechanical</option>
+            <option value="Plumbing">Plumbing</option>
+            <option value="Electrical">Electrical</option>
+            <option value="Civil">Civil</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="techEmail">Email:</label>
+          <input type="email" id="techEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="techContact">Contact:</label>
+          <input type="text" id="techContact" required>
+        </div>
+        <div class="checkbox-container">
+          <label>
+            <input type="checkbox" id="techAvailable" checked>
+            <span class="checkbox-custom"></span>
+            <span>Available for assignments</span>
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="cancelTech" class="button-delete">Cancel</button>
+          <button type="submit" id="saveTech" class="button-confirm">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let technicians = [
+      { id: 1, name: "Ijaz Ahmad", service: "HVAC/Mechanical", email: "ijaz@example.com", contact: "+971501234567", available: true },
+      { id: 2, name: "Kushawa Surjith", service: "Electrical", email: "kushawa@example.com", contact: "+971502345678", available: true },
+      { id: 3, name: "Harihara Sahu", service: "Plumbing", email: "harihara@example.com", contact: "+971503456789", available: true },
+      { id: 4, name: "Zaved Khan", service: "Civil", email: "zaved@example.com", contact: "+971504567890", available: true }
+    ];
+
+    let selectedTechnician = null;
+    let isConfirmed = false;
+    let isEditing = false;
+
+    const get = id => document.getElementById(id);
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticketDetails = {
+      number: urlParams.get("ticket") || "",
+      building: urlParams.get("building") || "",
+      unit: urlParams.get("unit") || "",
+      client: urlParams.get("name") || "",
+      contact: urlParams.get("phone") || "",
+      service: urlParams.get("service") || "",
+      workdesc: urlParams.get("workdesc") || "",
+      clientEmail: urlParams.get("client_email") || ""
+    };
+
+    // Initialize the page
+    function init() {
+      // Fill ticket info
+      get("ticketNumber").textContent = ticketDetails.number;
+      get("buildingName").textContent = ticketDetails.building;
+      get("unit").textContent = ticketDetails.unit;
+      get("clientName").textContent = ticketDetails.client;
+      get("clientContact").textContent = ticketDetails.contact;
+      get("clientEmail").textContent = ticketDetails.clientEmail;
+      get("serviceType").textContent = ticketDetails.service;
+      get("workDescription").textContent = ticketDetails.workdesc;
+      
+
+      // Set default date/time
+      const today = new Date();
+      get("arrivalDate").valueAsDate = today;
+      
+      const nextHour = new Date();
+      nextHour.setHours(nextHour.getHours() + 1);
+      get("arrivalTime").value = String(nextHour.getHours()).padStart(2, '0') + ":00";
+
+      renderTechnicians();
+    }
+
+    // Render technicians list
+    const renderTechnicians = () => {
+      const list = get("techniciansList");
+      list.innerHTML = "";
+      technicians.forEach(tech => {
+        const card = document.createElement("div");
+        card.className = "technician-card";
+        if (!tech.available) card.style.opacity = "0.6";
+        
+        card.innerHTML = `
+          <div class="tech-actions">
+            <button class="button-edit edit-tech" data-id="${tech.id}">Edit</button>
+            <button class="button-delete delete-tech" data-id="${tech.id}">Delete</button>
+          </div>
+          <div class="technician-name">${tech.name}</div>
+          <div class="technician-service">Specialty: ${tech.service}</div>
+          <div class="technician-contact">Contact: ${tech.contact}</div>
+          ${!tech.available ? '<div class="unavailable">(Currently Unavailable)</div>' : ''}
+        `;
+        
+        if (tech.available) {
+          card.onclick = () => selectTechnician(tech.id);
+        }
+        
+        if (selectedTechnician && selectedTechnician.id === tech.id) {
+          card.classList.add("selected");
+        }
+
+        list.appendChild(card);
+      });
+
+      // Attach Edit/Delete listeners
+      document.querySelectorAll(".edit-tech").forEach(btn => {
+        btn.onclick = e => {
+          e.stopPropagation();
+          openTechModal("edit", +btn.dataset.id);
+        };
+      });
+      document.querySelectorAll(".delete-tech").forEach(btn => {
+        btn.onclick = e => {
+          e.stopPropagation();
+          if(confirm("Are you sure you want to delete this technician?")){
+            deleteTechnician(+btn.dataset.id);
+          }
+        };
+      });
+    };
+
+    // Select technician from list
+    function selectTechnician(id) {
+      if (isConfirmed) return; // Cannot change after confirm
+
+      selectedTechnician = technicians.find(t => t.id === id);
+      renderTechnicians();
+      updateAssignedInfo();
+      get("confirmWorkOrder").disabled = false;
+      get("sendWorkOrder").disabled = true;
+    }
+
+    // Update assigned info display
+    function updateAssignedInfo() {
+      if (!selectedTechnician) {
+        get("assignedInfo").style.display = "none";
+        return;
+      }
+      get("assignedInfo").style.display = "block";
+      get("assignedTechName").textContent = selectedTechnician.name;
+      get("assignedTechService").textContent = selectedTechnician.service;
+      get("assignedTechEmail").textContent = selectedTechnician.email;
+      get("assignedTechContact").textContent = selectedTechnician.contact;
+    }
+
+    // Confirm Work Order (enable sending)
+    function confirmWorkOrder() {
+      if (!selectedTechnician) {
+        showStatus("Please select a technician first.", "error");
+        return;
+      }
+      const date = get("arrivalDate").value;
+      const time = get("arrivalTime").value;
+      if (!date || !time) {
+        showStatus("Please select a valid date and time.", "error");
+        return;
+      }
+      isConfirmed = true;
+      get("confirmWorkOrder").disabled = true;
+      get("sendWorkOrder").disabled = false;
+      showStatus("Work order confirmed. You can now send the work order email.", "success");
+    }
+
+    // Send Work Order Email
+    async function sendWorkOrder() {
+      if (!selectedTechnician) {
+        showStatus("No technician selected.", "error");
+        return;
+      }
+      const date = get("arrivalDate").value;
+      const time = get("arrivalTime").value;
+      if (!date || !time) {
+        showStatus("Please select a valid date and time.", "error");
+        return;
+      }
+
+      // Generate technician portal link with client details in URL parameters
+      const technicianPortalLink = generateTechnicianPortalLink(
+        ticketDetails.number,
+        ticketDetails.client,
+        ticketDetails.contact,
+        ticketDetails.building,
+        ticketDetails.service,
+        ticketDetails.workdesc,
+        ticketDetails.clientEmail
+      );
+
+      // Prepare EmailJS parameters
+      const emailParams = {
+        ticket_number: ticketDetails.number,
+        building_name: ticketDetails.building,
+        client_name: ticketDetails.client,
+        client_contact: ticketDetails.contact,
+        work_description: ticketDetails.workdesc || "Not provided",
+        client_email: ticketDetails.clientEmail || "Not provided",
+        service_type: ticketDetails.service,
+        technician_name: selectedTechnician.name,
+        technician_email: selectedTechnician.email,
+        technician_contact: selectedTechnician.contact,
+        scheduled_date: date,
+        scheduled_time: time,
+        technician_portal_link: technicianPortalLink,
+        to_email: selectedTechnician.email,
+      };
+
+      try {
+        await emailjs.send("service_2zga91s", "template_15f61z2", emailParams);
+        showStatus("Work order email sent successfully to technician.", "success");
+        get("sendWorkOrder").disabled = true;
+      } catch (error) {
+        console.error("EmailJS error:", error);
+        showStatus("Failed to send email. Try again later.", "error");
+      }
+    }
+
+    // Generate the technician portal URL with client info as query parameters
+    function generateTechnicianPortalLink(ticket, clientName, phone, building, service, workdesc, clientEmail) {
+      const baseUrl = "https://reliance-software.vercel.app/technician.html";
+      const params = new URLSearchParams({
+        ticket: ticket,
+        name: clientName,
+        phone: phone,
+        building: building,
+        service: service,
+        workdesc: workdesc,
+        client_email: clientEmail 
+      });
+      return `${baseUrl}?${params.toString()}`;
+    }
+
+    // Show status messages
+    function showStatus(message, type) {
+      const statusEl = get("statusMessage");
+      statusEl.textContent = message;
+      statusEl.className = `status-message ${type}`;
+      statusEl.style.display = "block";
+      setTimeout(() => {
+        statusEl.style.display = "none";
+      }, 8000);
+    }
+
+    // Manage Technicians Modal Logic
+    const modal = get("techModal");
+    const closeModalBtn = modal.querySelector(".close");
+    const techForm = get("techForm");
+    const modalTitle = get("modalTitle");
+
+    get("manageTechnicians").onclick = () => openTechModal("add");
+
+    closeModalBtn.onclick = () => closeTechModal();
+    get("cancelTech").onclick = () => closeTechModal();
+
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        closeTechModal();
+      }
+    };
+
+    function openTechModal(mode, techId = null) {
+      isEditing = mode === "edit";
+      modalTitle.textContent = isEditing ? "Edit Technician" : "Add New Technician";
+
+      if (isEditing) {
+        const tech = technicians.find(t => t.id === techId);
+        if (tech) {
+          get("techId").value = tech.id;
+          get("techName").value = tech.name;
+          get("techService").value = tech.service;
+          get("techEmail").value = tech.email;
+          get("techContact").value = tech.contact;
+          get("techAvailable").checked = tech.available;
+        }
+      } else {
+        techForm.reset();
+        get("techId").value = "";
+        get("techAvailable").checked = true;
+      }
+
+      modal.style.display = "block";
+    }
+
+    function closeTechModal() {
+      modal.style.display = "none";
+      isEditing = false;
+      techForm.reset();
+    }
+
+    techForm.onsubmit = function (e) {
+      e.preventDefault();
+
+      const id = get("techId").value ? parseInt(get("techId").value) : Date.now();
+      const name = get("techName").value.trim();
+      const service = get("techService").value;
+      const email = get("techEmail").value.trim();
+      const contact = get("techContact").value.trim();
+      const available = get("techAvailable").checked;
+
+      if (!name || !service || !email || !contact) {
+        alert("Please fill all technician details.");
+        return;
+      }
+
+      if (isEditing) {
+        // Update existing
+        const idx = technicians.findIndex(t => t.id === id);
+        if (idx >= 0) {
+          technicians[idx] = { id, name, service, email, contact, available };
+        }
+      } else {
+        // Add new
+        technicians.push({ id, name, service, email, contact, available });
+      }
+
+      closeTechModal();
+      renderTechnicians();
+    };
+
+    // Delete technician
+    function deleteTechnician(id) {
+      technicians = technicians.filter(t => t.id !== id);
+      if (selectedTechnician && selectedTechnician.id === id) {
+        selectedTechnician = null;
+        get("assignedInfo").style.display = "none";
+        get("confirmWorkOrder").disabled = true;
+        get("sendWorkOrder").disabled = true;
+      }
+      renderTechnicians();
+    }
+
+    // Attach button event listeners
+    get("confirmWorkOrder").onclick = confirmWorkOrder;
+    get("sendWorkOrder").onclick = sendWorkOrder;
+
+    // Initialize on load
+    window.onload = init;
+  </script>
+</body>
+</html>
