@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Track My Request</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: linear-gradient(120deg, #ffecd2, #fcb69f, #ffecd2, #fcb69f);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      max-width: 700px;
+      width: 90%;
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .container:hover {
+      transform: translateY(-5px);
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 2rem;
+      color: #ff6f61;
+      font-weight: 700;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px #ff6f61, 0 0 20px #ffb199, 0 0 30px #ff6f61;
+      animation: glow 2s ease-in-out infinite alternate;
+      margin-bottom: 25px;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ff6f61, 0 0 20px #ffb199, 0 0 30px #ff6f61; }
+      to { text-shadow: 0 0 20px #ff6f61, 0 0 30px #ffb199, 0 0 40px #ff6f61; }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    input[type="text"] {
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 2px solid #ff6f61;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 15px #ff6f61;
+      border-color: #ff6f61;
+    }
+
+    button {
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(45deg, #ff6f61, #ffb199);
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .details {
+      margin-top: 20px;
+      padding: 20px;
+      background: #fff0f0;
+      border-radius: 15px;
+      border: 2px solid #ff6f61;
+      animation: fadeIn 1s ease forwards;
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .details div {
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #ff6f61;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px rgba(255,111,97,0.7);
+      transition: all 0.3s ease;
+    }
+
+    .pending { background-color: #e74c3c; }
+    .in-progress { background-color: #f1c40f; color: #333; }
+    .done { background-color: #2ecc71; }
+
+    .ticket-image {
+      max-width: 100%;
+      margin-top: 15px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .ticket-image:hover {
+      transform: scale(1.05);
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Track Your Service Request</h2>
+
+    <div class="input-group">
+      <input type="text" id="ticketInput" placeholder="Enter your ticket number">
+      <button id="trackBtn">Track Request</button>
+    </div>
+
+    <div class="details" id="ticketDetails">
+      <div><span class="label">Ticket Number:</span> <span id="td_ticket"></span></div>
+      <div><span class="label">Name:</span> <span id="td_name"></span></div>
+      <div><span class="label">Phone:</span> <span id="td_phone"></span></div>
+      <div><span class="label">Building:</span> <span id="td_building"></span></div>
+      <div><span class="label">Unit Number:</span> <span id="td_unit"></span></div>
+      <div><span class="label">Service:</span> <span id="td_service"></span></div>
+      <div><span class="label">Date:</span> <span id="td_date"></span></div>
+      <div><span class="label">Subject:</span> <span id="td_subject"></span></div>
+      <div><span class="label">Description:</span> <span id="td_description"></span></div>
+      <div><span class="label">Status:</span> <span id="td_status"></span></div>
+      <div id="td_imageContainer"></div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBDhYwO_g6fLdYcn5tq5Nn-3iQlOUN3_yY",
+      authDomain: "btf-solution.firebaseapp.com",
+      projectId: "btf-solution",
+      storageBucket: "btf-solution.appspot.com",
+      messagingSenderId: "945488168158",
+      appId: "1:945488168158:web:c04bd192ef9779443a2e4f",
+      databaseURL: "https://btf-solution-default-rtdb.firebaseio.com"
+    };
+
+    // Initialize Firebase safely
+    let db;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+      console.log("Firebase initialized ✅");
+    } catch (err) {
+      console.error("Firebase init failed:", err);
+      alert("Firebase initialization failed. Check console for details.");
+    }
+
+    const trackBtn = document.getElementById("trackBtn");
+    const ticketDetails = document.getElementById("ticketDetails");
+
+    async function trackTicket(ticketNumber) {
+      const ticket = ticketNumber || document.getElementById("ticketInput").value.trim();
+      if (!ticket) {
+        alert("Please enter a ticket number");
+        return;
+      }
+
+      if (!db) {
+        alert("Database not initialized.");
+        return;
+      }
+
+      trackBtn.textContent = "Loading...";
+      trackBtn.disabled = true;
+
+      try {
+        const snapshot = await db.ref("tickets/" + ticket).once("value");
+        trackBtn.textContent = "Track Request";
+        trackBtn.disabled = false;
+
+        const data = snapshot.val();
+        console.log("Fetched data:", data);
+
+        if (!data) {
+          alert("No ticket found with number: " + ticket);
+          ticketDetails.style.display = "none";
+          return;
+        }
+
+        // Fill data
+        document.getElementById("td_ticket").textContent = ticket;
+        document.getElementById("td_name").textContent = data.name || '';
+        document.getElementById("td_phone").textContent = data.phone || '';
+        document.getElementById("td_building").textContent = data.building || '';
+        document.getElementById("td_unit").textContent = data.unit || '';
+        document.getElementById("td_service").textContent = data.service || '';
+        document.getElementById("td_date").textContent = data.date || '';
+        document.getElementById("td_subject").textContent = data.subject || '';
+        document.getElementById("td_description").textContent = data.description || '';
+
+        // Status badge
+        const statusValue = (data.status || 'Pending').toLowerCase();
+        const td_status = document.getElementById("td_status");
+        td_status.className = 'status-badge';
+        if (statusValue.includes('done') || statusValue.includes('completed')) {
+          td_status.classList.add('done');
+          td_status.textContent = 'Done';
+        } else if (statusValue.includes('in progress') || statusValue.includes('ongoing')) {
+          td_status.classList.add('in-progress');
+          td_status.textContent = 'In Progress';
+        } else {
+          td_status.classList.add('pending');
+          td_status.textContent = 'Pending';
+        }
+
+        // Image
+        const imgContainer = document.getElementById("td_imageContainer");
+        imgContainer.innerHTML = '';
+        if (data.imageUrl) {
+          const img = document.createElement("img");
+          img.src = data.imageUrl;
+          img.className = "ticket-image";
+          imgContainer.appendChild(img);
+        }
+
+        ticketDetails.style.display = "block";
+
+      } catch (err) {
+        console.error("Error fetching ticket:", err);
+        alert(`Error fetching ticket data:\n${err.message || err}`);
+        trackBtn.textContent = "Track Request";
+        trackBtn.disabled = false;
+      }
+    }
+
+    // Button click
+    trackBtn.addEventListener("click", () => trackTicket());
+
+    // Auto-load ticket from URL
+    window.addEventListener("DOMContentLoaded", () => {
+      const urlTicket = new URLSearchParams(window.location.search).get("ticket");
+      if (urlTicket) {
+        document.getElementById("ticketInput").value = urlTicket;
+        trackTicket(urlTicket);
+      }
+    });
+  </script>
+</body>
+</html>
